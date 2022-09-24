@@ -7,7 +7,100 @@
     <title>Aeroterra</title>
     <script src="scripts.js" defer></script>
     <link rel="stylesheet" href="styles.css">
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.24/"></script>
 </head>
 <body>
+    <div id="viewDiv"></div>
+    <div id="menu" class="unselectable">
+        <div id="myPlacesTab" title="Mis lugares">
+            Ico
+        </div>
+        <div id="myPlaces" class="retract">
+            <div>
+                <button id="buttonCloseMyPlaces" title="Cerrar">
+
+                </button>
+            </div>
+            <div id="myPlacesContainer"></div>
+        </div>
+        <div id="main">
+            <div class="bar test"></div>
+            <div class="content">
+    
+                <form id="formSearch" class="formSearch_center">
+                    <label for="name">
+                        Buscar
+                    </label>
+                    <div id="searchInner">
+                        <input id="inputSearch" type="text">
+    
+                        <button id="searchButton">
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+    
+                <div class="divInformation">
+                    <div class="searchResults onSearchResults">
+    
+                    </div>
+        
+                    <form class="fields onSearchResults">
+                        <div class="fieldWrapper">
+                            <label for="name">
+                                Nombre
+                            </label>
+                            <input name="name" id="name" type="text">
+                        </div>
+            
+                        <div class="fieldWrapper">
+                            <label for="address">
+                                Dirección
+                            </label>
+                            <input name="address" id="address" type="text" readonly>
+                        </div>
+            
+                        <div class="fieldWrapperDouble">
+                            <div>
+                                <label for="phone">
+                                    Teléfono
+                                </label>
+                                <input name="phone" id="phone" type="text">
+                            </div>
+    
+                            <div>
+                                <label for="category">
+                                    Categoría
+                                </label>
+                                <select name="category" id="category">
+                                    <option value="0" selected>Comercial</option>
+                                    <option value="1">Residencial</option>
+                                    <option value="2">Mixta</option>
+                                </select>
+                            </div>
+    
+                        </div>
+            
+                        <div class="fieldWrapper">
+                            <label for="coordinates">
+                                Coordenadas
+                            </label>
+                            <input id="coordinates" type="text" readonly>
+                            <input name="coordinatesRaw" id="coordinatesRaw" type="text" hidden>
+                        </div>
+
+                        <div class="fieldWrapper">
+                            <button class="menuButton">Guardar</button>
+                        </div>
+
+                    </form>
+                </div>
+    
+            </div>
+            <div class="bar test"></div>
+        </div>
+    </div>
 </body>
 </html>

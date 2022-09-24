@@ -1,11 +1,208 @@
 @import url("https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700");
 
+:root {
+    --background_menu: #ffffff;
+    --main: #6f36ff;
+    --secondary: #f7f9fb;
+    --secondary_hover: #e2e6e7;
+    --shadow: #00000022;
+    
+    --borderRadius_large: 10px;
+
+    --fontSize_large: 20px;
+    --fontSize_medium: 13px
+}
+
+/* #region General */
 * {
     box-sizing: border-box;
-    margin: 0px;
-    padding: 0px;
+    margin: 0;
+    padding: 0;
     font-family: Poppins, "sans-serif";
+    font-size: var(--fontSize_medium);
 }
 body {
-    background-color: white;
+    background-color: var(--background_menu);
+    overflow: hidden;
 }
+.unselectable {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.test {
+    border: 1px solid red;
+}
+/* #endregion */
+
+/* #region Menu */
+#menu {
+    background-color: var(--background_menu);
+    width: 390px;
+    position: absolute;
+    top: 50%;
+    left: 200px;
+    transform: translateY(-50%);
+}
+#main {
+    padding: 22px 30px;
+    border-radius: var(--borderRadius_large);
+    filter: drop-shadow(0px 0px 5px var(--shadow));
+    background-color: var(--background_menu);
+}
+#menu .bar {
+    height: 32px;
+    cursor: move;
+}
+.content {
+    padding: 14px 0px;
+    height: 338px;
+    overflow: hidden;
+}
+.divInformation {
+    height: 0%;
+    max-height: 248px;
+    overflow: hidden;
+    transition: height 0.3s ease;
+    position: relative;
+}
+label {
+    display: block;
+    width: fit-content;
+    margin-bottom: 2px;
+}
+.fieldWrapper, .fieldWrapperDouble {
+    margin-bottom: 10px;
+}
+.fieldWrapperDouble {
+    display: flex;
+    justify-content: space-between;
+}
+.fieldWrapperDouble div {
+    width: calc(50% - 9px);
+}
+input, select {
+    width: 100%;
+}
+#formSearch {
+    position: relative;
+    top: calc(50% - 35px);
+    transition: top 0.2s ease;
+    margin-bottom: 14px;
+}
+#formSearch.formSearch_up {
+    top: 0px;
+}
+#searchInner {
+    display: flex;
+}
+#searchButton {
+    width: 60px;
+    margin-left: 15px;
+    cursor: pointer;
+}
+#inputSearch {
+    flex: 1 1 auto;
+}
+.searchResults,
+.fields {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0px;
+    transition: all 0.2s ease-out;
+}
+.searchResults {
+    overflow-y: auto;
+}
+.fields.onSearchResults {
+    left: calc(100% + 10px);
+}
+.searchResults.onSearchResults {
+    right: 0px;
+}
+.fields.onFields {
+    left: 0%;
+}
+.searchResults.onFields {
+    right: calc(100% + 10px);
+}
+.open {
+    height: 100%;
+}
+.menuButton {
+    height: 100%;
+    width: 80px;
+}
+.searchResult {
+    margin-bottom: 6px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: var(--secondary);
+}
+.searchResult:last-child {
+    margin-bottom: unset;
+}
+.searchResult:hover {
+    background-color: var(--secondary_hover);
+}
+/* #endregion */
+
+/* #region Tab */
+#myPlacesTab {
+    position: absolute;
+    width: 32px;
+    height: 34px;
+    left: 100%;
+    top: 21px;
+    border-radius: 0px 4px 4px 0px;
+    background-color: var(--background_menu);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: left 0.13s ease-out;
+}
+#myPlacesTab.retract {
+    left: calc(100% - 33px);
+}
+#myPlaces {
+    position: absolute;
+    width: 220px;
+    left: 100%;
+    top: 21px;
+    bottom: 21px;
+    border-radius: 0px 4px 4px 0px;
+    background-color: var(--background_menu);
+    transition: left 0.19s ease-out;
+    padding: 20px 22px 22px 25px;
+}
+#myPlaces.retract {
+    left: calc(100% - 220px);
+}
+#myPlaces div:first-child {
+    width: 100%;
+    height: 20px;
+    margin-bottom: 10px;
+}
+#buttonCloseMyPlaces {
+    float: right;
+    height: 100%;
+    width: 20px;
+    background-color: silver;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+/* #endregion */
+
+/* #region Map */
+#viewDiv {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+}
+/* #endregion */
