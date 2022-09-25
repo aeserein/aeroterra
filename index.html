@@ -14,18 +14,18 @@
 <body>
     <div id="viewDiv"></div>
     <div id="menu" class="unselectable">
-        <div id="myPlacesTab" title="Mis lugares">
+        <div id="myPlacesTab" title="Mis lugares" onclick="openMyPlaces()">
             Ico
         </div>
         <div id="myPlaces" class="retract">
             <div>
-                <button id="buttonCloseMyPlaces" title="Cerrar">
+                <button id="buttonCloseMyPlaces" title="Cerrar" onclick="closeMyPlaces()">
 
                 </button>
             </div>
             <div id="myPlacesContainer"></div>
         </div>
-        <div id="main">
+        <div id="main" onclick="closeMyPlaces()">
             <div class="bar test"></div>
             <div class="content">
     
@@ -67,7 +67,7 @@
                                 <label for="phone">
                                     Teléfono
                                 </label>
-                                <input name="phone" id="phone" type="text">
+                                <input name="phone" id="phone" type="number">
                             </div>
     
                             <div>
@@ -91,8 +91,11 @@
                             <input name="coordinatesRaw" id="coordinatesRaw" type="text" hidden>
                         </div>
 
-                        <div class="fieldWrapper">
-                            <button class="menuButton">Guardar</button>
+                        <div class="buttonsWrapper">
+                            <div id="buttonDeleteWrapper" class="retract">
+                                <button id="buttonDelete" type="button" class="menuButton">Borrar</button>
+                            </div>
+                            <button type="submit" class="menuButton">Guardar</button>
                         </div>
 
                     </form>

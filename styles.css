@@ -34,12 +34,22 @@ body {
 .test {
     border: 1px solid red;
 }
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
 /* #endregion */
 
 /* #region Menu */
 #menu {
-    background-color: var(--background_menu);
-    width: 390px;
+    width: 387px;
     position: absolute;
     top: 50%;
     left: 200px;
@@ -52,7 +62,7 @@ body {
     background-color: var(--background_menu);
 }
 #menu .bar {
-    height: 32px;
+    height: 33px;
     cursor: move;
 }
 .content {
@@ -81,6 +91,10 @@ label {
 }
 .fieldWrapperDouble div {
     width: calc(50% - 9px);
+}
+.buttonsWrapper {
+    display: flex;
+    justify-content: end;
 }
 input, select {
     width: 100%;
@@ -135,6 +149,14 @@ input, select {
     height: 100%;
     width: 80px;
 }
+#buttonDeleteWrapper {
+    width: 90px;
+    overflow: hidden;
+    transition: width 0.11s ease-out;
+}
+#buttonDeleteWrapper.retract {
+    width: 0px;
+}
 .searchResult {
     margin-bottom: 6px;
     cursor: pointer;
@@ -145,7 +167,7 @@ input, select {
 .searchResult:last-child {
     margin-bottom: unset;
 }
-.searchResult:hover {
+.searchResult:hover, .savedPlace:hover {
     background-color: var(--secondary_hover);
 }
 /* #endregion */
@@ -182,19 +204,21 @@ input, select {
 #myPlaces.retract {
     left: calc(100% - 220px);
 }
-#myPlaces div:first-child {
-    width: 100%;
-    height: 20px;
-    margin-bottom: 10px;
-}
 #buttonCloseMyPlaces {
-    float: right;
-    height: 100%;
+    height: 20px;
     width: 20px;
+    margin-bottom: 10px;
     background-color: silver;
     border: none;
     outline: none;
     cursor: pointer;
+}
+.savedPlace {
+    margin-bottom: 6px;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 4px;
+    background-color: var(--secondary);
 }
 /* #endregion */
 

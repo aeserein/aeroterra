@@ -17,15 +17,27 @@ const field_coordinatesRaw = document.getElementById("coordinatesRaw");
 
 const tab = document.getElementById("myPlacesTab");
 const myPlaces = document.getElementById("myPlaces");
+const myPlacesContainer = document.getElementById("myPlacesContainer");
 const buttonCloseMyPlaces = document.getElementById("buttonCloseMyPlaces");
+const buttonDeleteWrapper = document.getElementById("buttonDeleteWrapper");
+const buttonDelete = document.getElementById("buttonDelete");
 //#endregion
 
 //#region Data
 let apiKey = "AAPK1b41e6e295d842e0a87bbc29e2983a50XNkG_CzPx4GE-wTKJMcU_xgykDl645pD4XOFgKFig5kgY4TMYdFjwI6etgL1rfF4";
-const colors = Object.freeze([
-    [150, 0, 20],		// 0, Comercial, red
-    [30, 10, 160],		// 1, Residencial, blue
-    [110, 0, 110],		// 2, Mixta, purple
+const categories = Object.freeze([
+    {
+        text: "Comercial",
+        color: [150, 0, 20]
+    },
+    {
+        text: "Residencial",
+        color: [30, 10, 160]
+    },
+    {
+        text: "Mixta",
+        color: [110, 0, 110]
+    }
 ]);
 function truncate(float) {
 	return Math.round((float + Number.EPSILON) * 10000) / 10000
@@ -34,11 +46,79 @@ class Place {
 	constructor(name, address, phone, category, y, x) {
 		this.name = name;
 		this.address = address;
-		this.phone = phone;
+		this.phone = parseInt(phone);
 		this.category = category;
 		this.y = y;
 		this.x = x;
 	}
+
+    drawDot(preview = false) {
+        require(["esri/Graphic"], (Graphic)=> {
+
+            const pointGeometry = {
+                type: "point",
+                longitude: this.x,
+                latitude: this.y
+            };
+        
+            const markerSymbol = {
+                type: "simple-marker",
+                color: preview ? [190, 194, 201] : categories[this.category].color,
+                outline: {
+                    color: [255, 255, 255],
+                    width: 2
+                }
+            };
+        
+            let coordinates = humanReadableCoordinates(this.y, this.x)
+            let attributes = {
+                Direccion: this.address,
+                Telefono: this.phone,
+                Categoria: categories[this.category].text,
+                Latitud: coordinates.latitude,
+                Longitud: coordinates.longitude
+            }
+        
+            let popupTemplate = {
+                content: [
+                    {
+                        type: "fields",
+                        fieldInfos: [
+                            {
+                                fieldName: "Latitud"
+                            },
+                            {
+                                fieldName: "Longitud"
+                            }
+                        ]
+                    }
+                ]
+            };
+            if (this.category) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Categoria"});
+            if (this.phone) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Telefono"});
+            if (this.name) {
+                popupTemplate.title = this.name;
+                popupTemplate.content[0].fieldInfos.unshift({fieldName: "Direccion"});
+            } else {
+                popupTemplate.title = this.address;
+            }
+        
+            this.removePoint();
+
+            this.point = new Graphic({
+                geometry: pointGeometry,
+                symbol: markerSymbol,
+                attributes: attributes,
+                popupTemplate: popupTemplate
+            });
+            view.graphics.add(this.point);
+        });
+    }
+
+    removePoint() {
+        if (this.point)
+            view.graphics.remove(this.point);
+    }
 }
 function parsePlaces(candidates) {
 	let places = [];
@@ -55,24 +135,64 @@ function parsePlaces(candidates) {
 	}
 	return places;
 }
-let places = [];
+let savedPlaces = [];
+function findSavedPlace(y, x) {
+    return savedPlaces.findIndex((place)=> {
+        return (
+            Math.abs(y - place.y) <= 0.0001 &&
+            Math.abs(x - place.x) <= 0.0001
+        )
+    });
+}
 function savePlace(place) {
-	places.push(place);
-	localStorage.setItem("places", JSON.stringify(places));
-	let fragment = document.createDocumentFragment();
-	let div = document.createElement("div");
-	div.classList.add("searchResult");
-	div.onclick = ()=> {
-		console.log("my place on click");
-	}
-	let p1 = document.createElement("p");
-	p1.innerHTML = place.name;
-	let p2 = document.createElement("p");
-	p2.innerHTML = place.address;
-	div.appendChild(p1)
-	div.appendChild(p2);
-	fragment.appendChild(div);
-	myPlaces.append(fragment);
+    let index = findSavedPlace(place.y, place.x)
+
+    if (index == -1) {  // New
+        savedPlaces.push(place);
+        place.drawDot();
+
+        let fragment = document.createDocumentFragment();
+        let div = document.createElement("div");
+        div.classList.add("savedPlace");
+        div.onclick = ()=> {
+            goToPoint(place)
+            fillFields(place, true);
+            raiseSearchBar();
+            closeMyPlaces();
+        }
+        let p1 = document.createElement("p");
+        p1.innerHTML = place.name;
+        let p2 = document.createElement("p");
+        p2.innerHTML = place.address;
+        div.appendChild(p1)
+        div.appendChild(p2);
+        fragment.appendChild(div);
+
+        myPlacesContainer.append(fragment);
+
+    } else {            // Modification
+        savedPlaces[index] = place;
+        savedPlaces[index].drawDot();
+        let placeDom = myPlacesContainer.children[index];
+        placeDom.children[0].innerHTML = savedPlaces[index].name;
+        placeDom.children[1].innerHTML = savedPlaces[index].address;
+    }
+    localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
+}
+function humanReadableCoordinates(y, x) {
+    let coordinates = {};
+    coordinates.latitude = (Math.abs(y) + "º");
+    if (y < 0)
+        coordinates.latitude += "S";
+    else
+        coordinates.latitude += "N";
+
+    coordinates.longitude = (Math.abs(x) + "º");
+    if (x < 0)
+        coordinates.longitude += "W";
+    else
+        coordinates.longitude += "E";
+    return coordinates;
 }
 //#endregion
 
@@ -91,7 +211,7 @@ const FIND_ADDRESS_CANDIDATES = "https://geocode-api.arcgis.com/arcgis/rest/serv
 //#endregion
 
 //#region Map
-let map, view, previewPoint;
+let map, view, previewPlace;
 require(
     [
         "esri/config",
@@ -123,7 +243,16 @@ require(
                 return view.goTo(options.target);
             }
         });
-        view.ui.add(locate, "top-left");	
+        view.ui.add(locate, "top-left");
+
+        let placesJson = JSON.parse(localStorage.getItem("savedPlaces"));
+        if (placesJson) {
+            for (let f = 0; f < placesJson.length; f++) {
+                let p = new Place(placesJson[f].name, placesJson[f].address, placesJson[f].phone, placesJson[f].category, placesJson[f].y, placesJson[f].x);
+                savePlace(p);
+            }
+            goToPoint(savedPlaces[savedPlaces.length-1]);
+        }
 	}
 );
 function goToPoint(place) {
@@ -133,83 +262,6 @@ function goToPoint(place) {
 	}).catch(function(error) {
 		if (error.name != "AbortError") {
 			console.error(error);
-		}
-	});
-	addDots([place], true);
-}
-function addDots(places, preview = false) {
-    require(["esri/Graphic"], (Graphic)=> {
-
-		for (let f = 0; f < places.length; f++) {
-			let x = truncate(places[f].x);
-			let y = truncate(places[f].y);
-		
-			const pointGeometry = {
-				type: "point",
-				longitude: x,
-				latitude: y
-			};
-		
-			const markerSymbol = {
-				type: "simple-marker",
-				color: preview ? [190, 194, 201] : colors[places[f].category],
-				outline: {
-					color: [255, 255, 255],
-					width: 2
-				}
-			};
-		
-			let attributes = {
-				Direccion: places[f].address,
-				Telefono: places[f].phone,
-				Categoria: places[f].category,
-				Latitud: y,
-				Longitud: x
-			}
-		
-			let popupTemplate = {
-				content: [
-					{
-						type: "fields",
-						fieldInfos: [
-							{
-								fieldName: "Latitud"
-							},
-							{
-								fieldName: "Longitud"
-							}
-						]
-					}
-				]
-			};
-			if (places[f].category) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Categoria"});
-			if (places[f].phone) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Telefono"});
-			if (places[f].name) {
-				popupTemplate.title = places[f].name;
-				popupTemplate.content[0].fieldInfos.unshift({fieldName: "Direccion"});
-			} else {
-				popupTemplate.title = places[f].address;
-			}
-		
-			if (preview) {
-				previewPoint = new Graphic({
-					geometry: pointGeometry,
-					symbol: markerSymbol,
-					attributes: attributes,
-					popupTemplate: popupTemplate
-				});
-			
-				view.graphics.add(previewPoint);
-			} else {
-				let point = new Graphic({
-					geometry: pointGeometry,
-					symbol: markerSymbol,
-					attributes: attributes,
-					popupTemplate: popupTemplate
-				});
-				console.log(point);
-				view.graphics.add(point);
-			}
 		}
 	});
 }
@@ -249,33 +301,27 @@ function fillCandidates(candidates) {
     }
     searchResults.innerHTML = "";
     showSearchResults()
+    buttonDeleteWrapper.classList.add("retract");
     searchResults.appendChild(fragment);
 }
-function fillFields(place) {
+function fillFields(place, withDeleteButton = false) {
     field_name.value = place.name;
     field_address.value = place.address;
     field_phone.value = place.phone;
     field_category.value = place.category;
-	console.warn(field_category.value);
     field_coordinatesRaw.value = place.y + "," + place.x;
-    let sCoordinates = "";
+    let coordinates = humanReadableCoordinates(place.y, place.x);
+    field_coordinates.value = coordinates.latitude + "  " + coordinates.longitude;
 
-    sCoordinates += (Math.abs(place.y) + "º ");
-    if (place.y < 0)
-        sCoordinates += "S";
-    else
-        sCoordinates += "N";
-    sCoordinates += (", " + Math.abs(place.x) + "º ");
-    if (place.x < 0)
-        sCoordinates += "W";
-    else
-        sCoordinates += "E";
-
+    if (withDeleteButton) {
+        buttonDeleteWrapper.classList.remove("retract");
+    }
     showFields();
-    field_coordinates.value = sCoordinates;
 }
 function candidateOnClick(place) {
     goToPoint(place);
+    previewPlace = place;
+	previewPlace.drawDot(true)
     setTimeout(() => {
         fillFields(place);
         clearSearchInput();
@@ -295,6 +341,7 @@ function showSearchResults() {
     searchResults.classList.remove("onFields");
     fields.classList.add("onSearchResults");
     searchResults.classList.add("onSearchResults");
+    
 }
 function openMyPlaces() {
     tab.classList.add("retract");
@@ -308,27 +355,36 @@ function closeMyPlaces() {
         tab.classList.remove("retract");
     }, 195);
 }
+function raiseSearchBar() {
+    formSearch.classList.add("formSearch_up");
+    setTimeout(() => {
+        divInformation.classList.add("open");
+    }, 190);
+}
+function lowerSearchBar() {
+    divInformation.classList.remove("open");
+    setTimeout(() => {
+        formSearch.classList.remove("formSearch_up");
+    }, 200);
+}
 //#endregion
 
 //#region Buttons
 formSearch.onsubmit = (event)=> {
     event.preventDefault();
-    fields.reset();
     let url = FIND_ADDRESS_CANDIDATES + inputSearch.value;
     httpGet(url, (r)=> {
         r = JSON.parse(r);
         if (r.candidates) {
 			let places = parsePlaces(r.candidates);
-            formSearch.classList.add("formSearch_up");
-            divInformation.classList.add("open");
+            raiseSearchBar();
             setTimeout(() => {
                 fillCandidates(places);
+                fields.reset();
             }, 205);
         }
     })
 }
-tab.onclick = openMyPlaces;
-buttonCloseMyPlaces.onclick = closeMyPlaces;
 fields.onsubmit = (event)=> {
     event.preventDefault();
     let fd = new FormData(fields);
@@ -336,12 +392,22 @@ fields.onsubmit = (event)=> {
     let address = fd.get("address");
     let phone = fd.get("phone");
     let category = fd.get("category");
-	console.log(category);
+
     let coordinates = fd.get("coordinatesRaw").split(",");
     let place = new Place(name, address, phone, category, parseFloat(coordinates[0]), parseFloat(coordinates[1]));
-	console.log(place);
-    view.graphics.remove(previewPoint);
-    addDots([place]);
+
+    view.graphics.remove(previewPlace.point);
 	savePlace(place);
+    goToPoint(place);
+    buttonDeleteWrapper.classList.remove("retract");
+}
+buttonDelete.onclick = ()=> {
+    let coordinates = field_coordinatesRaw.value.split(",");
+    let index = findSavedPlace(coordinates[0], coordinates[1]);
+    savedPlaces[index].removePoint();                                   // Remove point from map
+    myPlacesContainer.children[index].remove();                             // Remove from side menu
+    savedPlaces.splice(index, 1);                                       // Remove from array
+    localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));   // Save on ls
+    lowerSearchBar();
 }
 //#endregion
