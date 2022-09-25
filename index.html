@@ -7,7 +7,7 @@
     <title>Aeroterra</title>
     <script src="scripts.js" defer></script>
     <link rel="stylesheet" href="styles.css">
-
+	<link rel="icon" type="image/x-icon" href="img/favicon.ico">
     <link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css">
     <script src="https://js.arcgis.com/4.24/"></script>
 </head>
@@ -15,18 +15,27 @@
     <div id="viewDiv"></div>
     <div id="menu" class="unselectable">
         <div id="myPlacesTab" title="Mis lugares" onclick="openMyPlaces()">
-            Ico
+			<svg id="svgPin" viewBox="0 0 26.458333 36.512501">
+				<path class="fill_main" d="M 13.814428,0.01937331 A 13.11007,12.731762 0 0 0 0.25246444,10.156152 13.11007,12.731762 0 0 0 0.01837021,13.125976 c -0.37639747,6.927052 5.09936759,13.300893 10.17612279,20.005875 1.227054,1.514606 2.940595,3.181357 3.023072,3.380649 l 2.753837,-3.235441 C 22.247831,25.127188 31.417675,13.228839 23.198351,4.6278455 A 13.11007,12.731762 0 0 0 15.662377,0.24726479 13.11007,12.731762 0 0 0 13.814428,0.01937331 Z M 13.267174,6.9754895 a 6.4417347,6.5482454 0 0 1 1.11156,0.1250563 6.4417347,6.5482454 0 0 1 5.06119,7.6651122 6.4417347,6.5482454 0 0 1 -7.507036,5.193445 l -0.16123,-0.03307 A 6.4417347,6.5482454 0 0 1 6.8071031,12.197356 6.4417347,6.5482454 0 0 1 13.267174,6.9754895 Z" />
+			</svg>
         </div>
         <div id="myPlaces" class="retract">
             <div>
-                <button id="buttonCloseMyPlaces" title="Cerrar" onclick="closeMyPlaces()">
-
-                </button>
+				<!--
+				<svg id="buttonCloseMyPlaces" title="Cerrar" onclick="closeMyPlaces()" viewBox="0 0 25.135416 26.458334">
+					<g transform="matrix(0.01698224,0,0,-0.01698224,-1.0207175,23.010935)">
+						<path class="fill_secondary" d="M 1536,640 V 512 q 0,-53 -32.5,-90.5 Q 1471,384 1419,384 H 715 L 1008,90 q 38,-36 38,-90 0,-54 -38,-90 l -75,-76 q -37,-37 -90,-37 -52,0 -91,37 L 101,486 q -37,37 -37,90 0,52 37,91 l 651,650 q 38,38 91,38 52,0 90,-38 l 75,-74 q 38,-38 38,-91 0,-53 -38,-91 L 715,768 h 704 q 52,0 84.5,-37.5 Q 1536,693 1536,640 Z"/>
+					</g>
+				</svg>
+				-->
+				<img src="img/arrow.svg" id="buttonCloseMyPlaces" title="Cerrar" onclick="closeMyPlaces()">
             </div>
             <div id="myPlacesContainer"></div>
         </div>
         <div id="main" onclick="closeMyPlaces()">
-            <div class="bar test"></div>
+            <div class="bar">
+                <img class="imgBar" src="img/bar_light.svg">
+            </div>
             <div class="content">
     
                 <form id="formSearch" class="formSearch_center">
@@ -36,7 +45,7 @@
                     <div id="searchInner">
                         <input id="inputSearch" type="text">
     
-                        <button id="searchButton">
+                        <button id="searchButton" hidden>
                             Buscar
                         </button>
                     </div>
@@ -95,14 +104,16 @@
                             <div id="buttonDeleteWrapper" class="retract">
                                 <button id="buttonDelete" type="button" class="menuButton">Borrar</button>
                             </div>
-                            <button type="submit" class="menuButton">Guardar</button>
+                            <button type="submit" class="menuButton bg_main bold">Guardar</button>
                         </div>
 
                     </form>
                 </div>
     
             </div>
-            <div class="bar test"></div>
+            <div class="bar">
+                <img class="imgBar" src="img/bar_light.svg">
+            </div>
         </div>
     </div>
 </body>

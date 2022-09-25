@@ -2,9 +2,14 @@
 
 :root {
     --background_menu: #ffffff;
-    --main: #6f36ff;
-    --secondary: #f7f9fb;
-    --secondary_hover: #e2e6e7;
+    /* --main: #6f36ff; */
+    --main: #4891f0;
+    --mainLight: #99c2f8;
+    --secondary: #e9f1f3;
+    --text_main: #3a3a3e;
+    --subtle: #f5f5f7;
+    --subtle_hover: #f1f1f2;
+    --shadow_light: #00000010;
     --shadow: #00000022;
     
     --borderRadius_large: 10px;
@@ -20,6 +25,7 @@
     padding: 0;
     font-family: Poppins, "sans-serif";
     font-size: var(--fontSize_medium);
+    color: var(--text_main);
 }
 body {
     background-color: var(--background_menu);
@@ -34,11 +40,18 @@ body {
 .test {
     border: 1px solid red;
 }
-/* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
+}
+.bold {
+    font-weight: 500;
+}
+button {
+    border: none;
+    outline: none;
+    border-radius: 4px;
 }
 
 /* Firefox */
@@ -56,7 +69,7 @@ input[type=number] {
     transform: translateY(-50%);
 }
 #main {
-    padding: 22px 30px;
+    padding: 20px 28px;
     border-radius: var(--borderRadius_large);
     filter: drop-shadow(0px 0px 5px var(--shadow));
     background-color: var(--background_menu);
@@ -64,15 +77,22 @@ input[type=number] {
 #menu .bar {
     height: 33px;
     cursor: move;
+    overflow: hidden;
+    border-radius: 5px;
+}
+.imgBar {
+    pointer-events: none;
+    display: block;
+    margin: auto;
 }
 .content {
-    padding: 14px 0px;
-    height: 338px;
+    padding: 12px 0px;
+    height: 348px;
     overflow: hidden;
 }
 .divInformation {
     height: 0%;
-    max-height: 248px;
+    max-height: 262px;
     overflow: hidden;
     transition: height 0.3s ease;
     position: relative;
@@ -81,6 +101,7 @@ label {
     display: block;
     width: fit-content;
     margin-bottom: 2px;
+    padding-left: 10px;
 }
 .fieldWrapper, .fieldWrapperDouble {
     margin-bottom: 10px;
@@ -95,9 +116,17 @@ label {
 .buttonsWrapper {
     display: flex;
     justify-content: end;
+    margin-top: 16px;
+    height: 24px;
 }
 input, select {
     width: 100%;
+    height: 26px;
+    padding-left: 10px;
+    outline: none;
+    border: none;
+    background-color: var(--subtle);
+    border-radius: 3px;
 }
 #formSearch {
     position: relative;
@@ -118,6 +147,11 @@ input, select {
 }
 #inputSearch {
     flex: 1 1 auto;
+    background-image: url("img/search.svg");
+    background-position: 10px;
+    background-size: 14px;
+    background-repeat: no-repeat;
+    padding-left: 36px;
 }
 .searchResults,
 .fields {
@@ -162,13 +196,13 @@ input, select {
     cursor: pointer;
     padding: 10px;
     border-radius: 4px;
-    background-color: var(--secondary);
+    background-color: var(--subtle);
 }
 .searchResult:last-child {
     margin-bottom: unset;
 }
 .searchResult:hover, .savedPlace:hover {
-    background-color: var(--secondary_hover);
+    background-color: var(--subtle_hover);
 }
 /* #endregion */
 
@@ -176,7 +210,7 @@ input, select {
 #myPlacesTab {
     position: absolute;
     width: 32px;
-    height: 34px;
+    height: 36px;
     left: 100%;
     top: 21px;
     border-radius: 0px 4px 4px 0px;
@@ -186,6 +220,10 @@ input, select {
     justify-content: center;
     cursor: pointer;
     transition: left 0.13s ease-out;
+}
+#svgPin {
+    height: 17px;
+    display: block;
 }
 #myPlacesTab.retract {
     left: calc(100% - 33px);
@@ -198,19 +236,15 @@ input, select {
     bottom: 21px;
     border-radius: 0px 4px 4px 0px;
     background-color: var(--background_menu);
-    transition: left 0.19s ease-out;
+    transition: left 0.18s ease-out;
     padding: 20px 22px 22px 25px;
 }
 #myPlaces.retract {
     left: calc(100% - 220px);
 }
 #buttonCloseMyPlaces {
-    height: 20px;
-    width: 20px;
+    height: 16px;
     margin-bottom: 10px;
-    background-color: silver;
-    border: none;
-    outline: none;
     cursor: pointer;
 }
 .savedPlace {
@@ -218,7 +252,7 @@ input, select {
     cursor: pointer;
     padding: 10px;
     border-radius: 4px;
-    background-color: var(--secondary);
+    background-color: var(--subtle);
 }
 /* #endregion */
 
@@ -228,5 +262,21 @@ input, select {
     margin: 0;
     height: 100vh;
     width: 100vw;
+}
+/* #endregion */
+
+/* #region Colors */
+.fill_main {
+    fill: var(--main);
+}
+.fill_mainDark {
+    fill: var(--mainDark);
+}
+.fill_secondary {
+    fill: var(--secondary);
+}
+.bg_main {
+    background-color: var(--main);
+    color: white;
 }
 /* #endregion */

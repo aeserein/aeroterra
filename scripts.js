@@ -161,6 +161,7 @@ function savePlace(place) {
             closeMyPlaces();
         }
         let p1 = document.createElement("p");
+        p1.classList.add("bold")
         p1.innerHTML = place.name;
         let p2 = document.createElement("p");
         p2.innerHTML = place.address;
@@ -230,8 +231,8 @@ require(
 
         view = new MapView({
             map: map,
-            center: [18.9553, 69.6492],
-            zoom: 14,
+            center: [-58.3816, -34.6037],
+            zoom: 13,
             container: "viewDiv"
         });
 
@@ -246,7 +247,7 @@ require(
         view.ui.add(locate, "top-left");
 
         let placesJson = JSON.parse(localStorage.getItem("savedPlaces"));
-        if (placesJson) {
+        if (placesJson && placesJson.length > 0) {
             for (let f = 0; f < placesJson.length; f++) {
                 let p = new Place(placesJson[f].name, placesJson[f].address, placesJson[f].phone, placesJson[f].category, placesJson[f].y, placesJson[f].x);
                 savePlace(p);
@@ -259,10 +260,6 @@ function goToPoint(place) {
 	view.zoom = 16;
 	view.goTo({
 		center: [place.x, place.y]
-	}).catch(function(error) {
-		if (error.name != "AbortError") {
-			console.error(error);
-		}
 	});
 }
 //#endregion
@@ -292,6 +289,7 @@ function fillCandidates(candidates) {
             candidateOnClick(candidates[f]);
         }
         let p1 = document.createElement("p");
+        p1.classList.add("bold")
         p1.innerHTML = candidates[f].name;
         let p2 = document.createElement("p");
         p2.innerHTML = candidates[f].address;
@@ -345,27 +343,19 @@ function showSearchResults() {
 }
 function openMyPlaces() {
     tab.classList.add("retract");
-    setTimeout(() => {
-        myPlaces.classList.remove("retract");
-    }, 135);
+    setTimeout(myPlaces.classList.remove("retract"), 135);
 }
 function closeMyPlaces() {
     myPlaces.classList.add("retract");
-    setTimeout(() => {
-        tab.classList.remove("retract");
-    }, 195);
+    setTimeout(tab.classList.remove("retract"), 185);
 }
 function raiseSearchBar() {
     formSearch.classList.add("formSearch_up");
-    setTimeout(() => {
-        divInformation.classList.add("open");
-    }, 190);
+    setTimeout(divInformation.classList.add("open"), 190);
 }
 function lowerSearchBar() {
     divInformation.classList.remove("open");
-    setTimeout(() => {
-        formSearch.classList.remove("formSearch_up");
-    }, 200);
+    setTimeout(formSearch.classList.remove("formSearch_up"), 200);
 }
 //#endregion
 
