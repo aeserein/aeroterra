@@ -26,15 +26,15 @@ const buttonDelete = document.getElementById("buttonDelete");
 const categories = Object.freeze([
     {
         text: "Comercial",
-        color: [150, 0, 20]
+        color: [196, 42, 71]
     },
     {
         text: "Residencial",
-        color: [30, 10, 160]
+        color: [0, 122, 194]
     },
     {
         text: "Mixta",
-        color: [110, 0, 110]
+        color: [138, 72, 169]
     }
 ]);
 function truncate(float) {
