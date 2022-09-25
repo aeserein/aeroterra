@@ -147,7 +147,6 @@ function parsePlaces(candidates) {
 		)
 		places.push(place);
 	}
-    console.log(places);
 	return places;
 }
 let savedPlaces = [];
@@ -215,8 +214,9 @@ require(
         "esri/Map",
         "esri/views/MapView",
         "esri/widgets/Locate",
+        "esri/rest/locator"
     ],
-    (esriConfig, Map, MapView, Locate)=> {
+    (esriConfig, Map, MapView, Locate, locator)=> {
 
         esriConfig.apiKey = apiKey;
 
@@ -241,6 +241,30 @@ require(
         });
         view.ui.add(locate, "top-left");
 
+        view.on("click", function(evt){
+            const params = {
+              location: evt.mapPoint
+            };
+            locator.locationToAddress(GEOCODE_URL, params)
+            .then(function(response) {
+                let attributes = response.attributes;
+                let place = new Place(
+                    attributes.PlaceName,
+                    attributes.Address +", "+ attributes.City +", "+ attributes.RegionAbbr,
+                    null,
+                    0,
+                    truncate(evt.mapPoint.latitude),
+                    truncate(evt.mapPoint.longitude)
+                )
+                candidateOnClick(place);
+                fillFields(place);
+                buttonDeleteWrapper.classList.add("retract");
+                raiseSearchBar();
+            }, function(err) {
+                showAddress("No address found.", evt.mapPoint);
+            });
+        });        
+
         let placesJson = JSON.parse(localStorage.getItem("savedPlaces"));
         if (placesJson && placesJson.length > 0) {
             for (let f = 0; f < placesJson.length; f++) {
@@ -257,6 +281,28 @@ function goToPoint(place) {
         zoom: 16
 	});
 }
+function showAddress(place) {
+    view.popup.open({
+        title: place.name,
+        content: place.address,
+        location: {latitude: place.y, longitude: place.x}
+    });
+}
+//#endregion
+
+//#region Queries
+function httpGet(url, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            callback(xmlHttp.responseText);
+        }
+    }
+    xmlHttp.open("GET", url, true);
+    xmlHttp.send(null);
+}
+const GEOCODE_URL = "http://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+const FIND_ADDRESS_CANDIDATES = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&outFields=PlaceName,Place_addr&token=" + apiKey + "&address=";
 //#endregion
 
 //#region Menu
@@ -322,6 +368,7 @@ function fillFields(place, withDeleteButton = false) {
 }
 function candidateOnClick(place) {
     goToPoint(place);
+    showAddress(place);
     previewPlace = place;
 	previewPlace.drawDot(true)
     setTimeout(() => {
@@ -375,20 +422,6 @@ function animateTab() {
         tab.classList.remove("animate");
     }, 3010);
 }
-//#endregion
-
-//#region Queries
-function httpGet(url, callback) {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            callback(xmlHttp.responseText);
-        }
-    }
-    xmlHttp.open("GET", url, true);
-    xmlHttp.send(null);
-}
-const FIND_ADDRESS_CANDIDATES = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&outFields=PlaceName,Place_addr&token=" + apiKey + "&address=";
 //#endregion
 
 //#region Buttons
