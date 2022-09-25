@@ -2,7 +2,6 @@
 
 :root {
     --background_menu: #ffffff;
-    /* --main: #6f36ff; */
     --main: #007ac2;
     --mainLight: #99c2f8;
     --secondary: #e9f1f3;
@@ -53,8 +52,6 @@ button {
     outline: none;
     border-radius: 4px;
 }
-
-/* Firefox */
 input[type=number] {
     -moz-appearance: textfield;
 }
