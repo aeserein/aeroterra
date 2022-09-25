@@ -1,7 +1,6 @@
 //#region Elements
 const menu = document.getElementById("menu");
 const bars = document.getElementsByClassName("bar");
-const form = document.getElementById("searchButton");
 const formSearch = document.getElementById("formSearch");
 const searchResults = document.getElementsByClassName("searchResults")[0];
 const fields = document.getElementsByClassName("fields")[0];
@@ -24,7 +23,6 @@ const buttonDelete = document.getElementById("buttonDelete");
 //#endregion
 
 //#region Data
-let apiKey = "AAPK1b41e6e295d842e0a87bbc29e2983a50XNkG_CzPx4GE-wTKJMcU_xgykDl645pD4XOFgKFig5kgY4TMYdFjwI6etgL1rfF4";
 const categories = Object.freeze([
     {
         text: "Comercial",
@@ -70,7 +68,7 @@ class Place {
                 }
             };
         
-            let coordinates = humanReadableCoordinates(this.y, this.x)
+            let coordinates = this.humanReadableCoordinates();
             let attributes = {
                 Direccion: this.address,
                 Telefono: this.phone,
@@ -119,6 +117,22 @@ class Place {
         if (this.point)
             view.graphics.remove(this.point);
     }
+
+    humanReadableCoordinates() {
+        let coordinates = {};
+        coordinates.latitude = (Math.abs(this.y) + "º");
+        if (this.y < 0)
+            coordinates.latitude += "S";
+        else
+            coordinates.latitude += "N";
+    
+        coordinates.longitude = (Math.abs(this.x) + "º");
+        if (this.x < 0)
+            coordinates.longitude += "W";
+        else
+            coordinates.longitude += "E";
+        return coordinates;
+    }
 }
 function parsePlaces(candidates) {
 	let places = [];
@@ -133,6 +147,7 @@ function parsePlaces(candidates) {
 		)
 		places.push(place);
 	}
+    console.log(places);
 	return places;
 }
 let savedPlaces = [];
@@ -161,12 +176,21 @@ function savePlace(place) {
             closeMyPlaces();
         }
         let p1 = document.createElement("p");
-        p1.classList.add("bold")
-        p1.innerHTML = place.name;
-        let p2 = document.createElement("p");
-        p2.innerHTML = place.address;
-        div.appendChild(p1)
-        div.appendChild(p2);
+        if (place.name.length > 0) {
+            p1.innerHTML = place.name;
+            p1.classList.add("bold");
+            let p2 = document.createElement("p");
+            p2.innerHTML = place.address;
+            div.appendChild(p1);
+            div.appendChild(p2);
+        } else if (place.address.length > 0) {
+            p1.innerHTML = place.address;
+            div.appendChild(p1);
+        } else {
+            let coordinates = place.humanReadableCoordinates();
+            p1.innerHTML = coordinates.latitude + "  " + coordinates.longitude;
+            div.appendChild(p1);
+        }
         fragment.appendChild(div);
 
         myPlacesContainer.append(fragment);
@@ -180,39 +204,11 @@ function savePlace(place) {
     }
     localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
 }
-function humanReadableCoordinates(y, x) {
-    let coordinates = {};
-    coordinates.latitude = (Math.abs(y) + "º");
-    if (y < 0)
-        coordinates.latitude += "S";
-    else
-        coordinates.latitude += "N";
-
-    coordinates.longitude = (Math.abs(x) + "º");
-    if (x < 0)
-        coordinates.longitude += "W";
-    else
-        coordinates.longitude += "E";
-    return coordinates;
-}
-//#endregion
-
-//#region Queries
-function httpGet(url, callback) {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            callback(xmlHttp.responseText);
-        }
-    }
-    xmlHttp.open("GET", url, true);
-    xmlHttp.send(null);
-}
-const FIND_ADDRESS_CANDIDATES = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&outFields=PlaceName,Place_addr&token=" + apiKey + "&address=";
 //#endregion
 
 //#region Map
 let map, view, previewPlace;
+let apiKey = "AAPK1b41e6e295d842e0a87bbc29e2983a50XNkG_CzPx4GE-wTKJMcU_xgykDl645pD4XOFgKFig5kgY4TMYdFjwI6etgL1rfF4";
 require(
     [
         "esri/config",
@@ -225,7 +221,6 @@ require(
         esriConfig.apiKey = apiKey;
 
         map = new Map({
-            //basemap: "arcgis-topographic"
             basemap: "arcgis-navigation"
         });
 
@@ -257,9 +252,9 @@ require(
 	}
 );
 function goToPoint(place) {
-	view.zoom = 16;
 	view.goTo({
-		center: [place.x, place.y]
+		center: [place.x, place.y],
+        zoom: 16
 	});
 }
 //#endregion
@@ -289,16 +284,25 @@ function fillCandidates(candidates) {
             candidateOnClick(candidates[f]);
         }
         let p1 = document.createElement("p");
-        p1.classList.add("bold")
-        p1.innerHTML = candidates[f].name;
-        let p2 = document.createElement("p");
-        p2.innerHTML = candidates[f].address;
-        div.appendChild(p1)
-        div.appendChild(p2);
+        if (candidates[f].name.length > 0) {
+            p1.classList.add("bold");
+            p1.innerHTML = candidates[f].name;
+            let p2 = document.createElement("p");
+            p2.innerHTML = candidates[f].address;
+            div.appendChild(p1);
+            div.appendChild(p2);
+        } else if (candidates[f].address.length > 0) {
+            p1.innerHTML = candidates[f].address;
+            div.appendChild(p1);
+        } else {
+            let coordinates = candidates[f].humanReadableCoordinates();
+            p1.innerHTML = coordinates.latitude + "  " + coordinates.longitude;
+            div.appendChild(p1);
+        }
         fragment.appendChild(div);
     }
     searchResults.innerHTML = "";
-    showSearchResults()
+    showSearchResults();
     buttonDeleteWrapper.classList.add("retract");
     searchResults.appendChild(fragment);
 }
@@ -308,7 +312,7 @@ function fillFields(place, withDeleteButton = false) {
     field_phone.value = place.phone;
     field_category.value = place.category;
     field_coordinatesRaw.value = place.y + "," + place.x;
-    let coordinates = humanReadableCoordinates(place.y, place.x);
+    let coordinates = place.humanReadableCoordinates();
     field_coordinates.value = coordinates.latitude + "  " + coordinates.longitude;
 
     if (withDeleteButton) {
@@ -343,20 +347,48 @@ function showSearchResults() {
 }
 function openMyPlaces() {
     tab.classList.add("retract");
-    setTimeout(myPlaces.classList.remove("retract"), 135);
+    setTimeout(() => {
+        myPlaces.classList.remove("retract");
+    }, 135);
 }
 function closeMyPlaces() {
     myPlaces.classList.add("retract");
-    setTimeout(tab.classList.remove("retract"), 185);
+    setTimeout(() => {
+        tab.classList.remove("retract");
+    }, 185);
 }
 function raiseSearchBar() {
     formSearch.classList.add("formSearch_up");
-    setTimeout(divInformation.classList.add("open"), 190);
+    setTimeout(() => {
+        divInformation.classList.add("open");
+    }, 190);
 }
 function lowerSearchBar() {
     divInformation.classList.remove("open");
-    setTimeout(formSearch.classList.remove("formSearch_up"), 200);
+    setTimeout(() => {
+        formSearch.classList.remove("formSearch_up");
+    }, 200);
 }
+function animateTab() {
+    tab.classList.add("animate");
+    setTimeout(() => {
+        tab.classList.remove("animate");
+    }, 3010);
+}
+//#endregion
+
+//#region Queries
+function httpGet(url, callback) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            callback(xmlHttp.responseText);
+        }
+    }
+    xmlHttp.open("GET", url, true);
+    xmlHttp.send(null);
+}
+const FIND_ADDRESS_CANDIDATES = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&outFields=PlaceName,Place_addr&token=" + apiKey + "&address=";
 //#endregion
 
 //#region Buttons
@@ -386,18 +418,22 @@ fields.onsubmit = (event)=> {
     let coordinates = fd.get("coordinatesRaw").split(",");
     let place = new Place(name, address, phone, category, parseFloat(coordinates[0]), parseFloat(coordinates[1]));
 
-    view.graphics.remove(previewPlace.point);
+    if (previewPlace) {
+        previewPlace.removePoint();
+    }
 	savePlace(place);
+    animateTab();
     goToPoint(place);
     buttonDeleteWrapper.classList.remove("retract");
 }
 buttonDelete.onclick = ()=> {
     let coordinates = field_coordinatesRaw.value.split(",");
     let index = findSavedPlace(coordinates[0], coordinates[1]);
-    savedPlaces[index].removePoint();                                   // Remove point from map
-    myPlacesContainer.children[index].remove();                             // Remove from side menu
-    savedPlaces.splice(index, 1);                                       // Remove from array
-    localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));   // Save on ls
+    savedPlaces[index].removePoint();
+    myPlacesContainer.children[index].remove();
+    savedPlaces.splice(index, 1);
+    localStorage.setItem("savedPlaces", JSON.stringify(savedPlaces));
+    animateTab();
     lowerSearchBar();
 }
 //#endregion
