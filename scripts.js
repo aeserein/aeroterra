@@ -70,9 +70,9 @@ class Place {
         
             let coordinates = this.humanReadableCoordinates();
             let attributes = {
-                Direccion: this.address,
-                Telefono: this.phone,
-                Categoria: categories[this.category].text,
+                Dirección: this.address,
+                Teléfono: this.phone,
+                Categoría: categories[this.category].text,
                 Latitud: coordinates.latitude,
                 Longitud: coordinates.longitude
             }
@@ -92,11 +92,11 @@ class Place {
                     }
                 ]
             };
-            if (this.category) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Categoria"});
-            if (this.phone) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Telefono"});
+            if (this.category) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Categoría"});
+            if (this.phone) popupTemplate.content[0].fieldInfos.unshift({fieldName: "Teléfono"});
             if (this.name) {
                 popupTemplate.title = this.name;
-                popupTemplate.content[0].fieldInfos.unshift({fieldName: "Direccion"});
+                popupTemplate.content[0].fieldInfos.unshift({fieldName: "Dirección"});
             } else {
                 popupTemplate.title = this.address;
             }
@@ -241,14 +241,21 @@ require(
         });
         view.ui.add(locate, "top-left");
 
-        view.on("click", function(evt){
+        ////////////////////////////////////////////////////////////////////////////////
+        view.on("click", (evt)=> {
+            // Al clickear en el mapa anda bien, pero al clickear en un punto abre el popup del punto y el de este evento al mismo tiempo
+            // No puedo diferenciar un click en un punto de un click en el mapa
+            // Los Graphics o Geometries no tienen event listeners como la vista
+            // Comentar este bloque para poder ver bien el popup con los atributos, pero desactivando el reverse geocoding
             const params = {
-              location: evt.mapPoint
+                location: evt.mapPoint
             };
             locator.locationToAddress(GEOCODE_URL, params)
             .then(function(response) {
                 let attributes = response.attributes;
-                let place = new Place(
+                if (previewPlace)
+                    previewPlace.removePoint();
+                previewPlace = new Place(
                     attributes.PlaceName,
                     attributes.Address +", "+ attributes.City +", "+ attributes.RegionAbbr,
                     null,
@@ -256,14 +263,15 @@ require(
                     truncate(evt.mapPoint.latitude),
                     truncate(evt.mapPoint.longitude)
                 )
-                candidateOnClick(place);
-                fillFields(place);
+                candidateOnClick(previewPlace);
+                fillFields(previewPlace);
                 buttonDeleteWrapper.classList.add("retract");
                 raiseSearchBar();
             }, function(err) {
                 showAddress("No address found.", evt.mapPoint);
             });
-        });        
+        });
+        ////////////////////////////////////////////////////////////////////////////////
 
         let placesJson = JSON.parse(localStorage.getItem("savedPlaces"));
         if (placesJson && placesJson.length > 0) {
